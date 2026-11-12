@@ -10,6 +10,7 @@ from numpy.typing import NDArray
 XML = Path(__file__).parent / "test.xml"
 
 TARGET_SPEED = 0.5
+TARGET_HEIGHT = -0.2
 TARGET_TILD = math.cos(math.radians(85))
 
 FRAME_SKIP = 5
@@ -53,7 +54,9 @@ class BiRbotEnv(gym.Env):
         self.steps += 1
 
         obs = self._getObs()
-        reward = self.data.xmat[self.body_id][8]
+        reward = self.data.xmat[self.body_id][8] * np.exp(
+            -((((self.data.xpos[self.body_id][2]) - TARGET_HEIGHT) / 0.05) ** 2)
+        )
         terminated = not self._yUp()
         truncated = self.steps >= MAX_STEPS
 
