@@ -55,7 +55,7 @@ class BiRbotEnv(gym.Env):
 
         obs = self._getObs()
         reward = self.data.xmat[self.body_id][8] * np.exp(
-            -((((self.data.xpos[self.body_id][2]) - TARGET_HEIGHT) / 0.05) ** 2)
+            -((((self.data.xpos[self.body_id][2]) - TARGET_HEIGHT) / 0.1) ** 2)
         )
         terminated = not self._yUp()
         truncated = self.steps >= MAX_STEPS
@@ -90,4 +90,7 @@ class BiRbotEnv(gym.Env):
 
     def _yUp(self) -> bool:
 
-        return not self.data.xmat[self.body_id][8] < TARGET_TILD
+        return not (
+            self.data.xmat[self.body_id][8] < TARGET_TILD
+            or self.data.xpos[self.body_id][2] <= -0.3
+        )
