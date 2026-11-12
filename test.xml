@@ -1,12 +1,11 @@
 <mujoco>
   <worldbody>
-    <body>
-      <geom type="plane" size="10 10 0.01" pos="0 0 -0.5"></geom>
-    </body>
+    <geom type="plane" size="10 10 0.01" pos="0 0 -0.5"></geom>
 
     <body name="Body">
       <geom type="box" size="0.1 0.1 0.075" rgba="0 1 0.6 1" mass="1.5"></geom>
       <freejoint></freejoint>
+      <site name="imu" pos="0 0 0"></site>
 
       <body name="RightThigh" pos="0.12 -0.025 -0.1">
         <geom type="box" size="0.02 0.04 0.1" rgba="1 0 .5 1" mass="0.2"></geom>
@@ -39,6 +38,11 @@
       </body>
     </body>
   </worldbody>
+
+  <sensor>
+    <accelerometer name="accel" site="imu"></accelerometer>
+    <gyro name="gyro" site="imu"></gyro>
+  </sensor>
 
   <actuator>
     <position name="hip_R" joint="hip_R" kp="20" kv="0.5" ctrlrange="-1.57 1.57" forcerange="-3 3" />
