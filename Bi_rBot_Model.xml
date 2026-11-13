@@ -1,0 +1,81 @@
+<mujoco>
+  <worldbody>
+    <geom type="plane" size="10 10 0.01" pos="0 0 -0.5"></geom>
+
+    <!--
+      Mass distribution (estimates, total ~2.6 kg). Replace with real weights once known.
+        Body:   structure 0.20 (PETG) + battery 0.25 + electronics 0.15
+                + 4x DM-J4310P 0.30 each (hip + knee motors, coaxial at the hip axis)
+        Thigh:  0.06 (carbon/PETG link + belt, pulleys, bearings)
+        Shin:   0.03 (link) + DM-H6215 wheel motor 0.25 (at the wheel axis, housing doesn't spin)
+        Wheel:  0.05 (PETG hub + TPU tread)
+      The motor/battery/electronics geoms only add mass (contype/conaffinity 0 = no collisions).
+      Motor masses are guesses (~300 g / ~250 g): no official weight found, weigh them when they arrive.
+    -->
+    <body name="Body">
+      <geom type="box" size="0.1 0.1 0.075" rgba="0 1 0.6 1" mass="0.2"></geom>
+      <geom name="battery" type="box" size="0.06 0.035 0.02" pos="0 0 -0.04" rgba="0.2 0.2 0.2 1" mass="0.25" contype="0" conaffinity="0"></geom>
+      <geom name="electronics" type="box" size="0.05 0.04 0.01" pos="0 0 0.03" rgba="0.1 0.4 0.1 1" mass="0.15" contype="0" conaffinity="0"></geom>
+      <!-- hip + knee motors, coaxial on the hip axis (x = +-0.12, y = -0.025, z = 0) -->
+      <geom name="hip_motor_R" type="cylinder" size="0.023 0.018" pos="0.075 -0.025 0" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.3" contype="0" conaffinity="0"></geom>
+      <geom name="knee_motor_R" type="cylinder" size="0.023 0.018" pos="0.035 -0.025 0" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.3" contype="0" conaffinity="0"></geom>
+      <geom name="hip_motor_L" type="cylinder" size="0.023 0.018" pos="-0.075 -0.025 0" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.3" contype="0" conaffinity="0"></geom>
+      <geom name="knee_motor_L" type="cylinder" size="0.023 0.018" pos="-0.035 -0.025 0" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.3" contype="0" conaffinity="0"></geom>
+      <freejoint></freejoint>
+      <site name="imu" pos="0 0 0"></site>
+
+      <body name="RightThigh" pos="0.12 -0.025 -0.1">
+        <geom type="box" size="0.02 0.04 0.1" rgba="1 0 .5 1" mass="0.06"></geom>
+        <joint name="hip_R" type="hinge" pos="0 0 0.1" axis="1 0 0" range="-90 90"></joint>
+
+        <body name="RightShin" pos="0 0 -0.2">
+          <geom type="box" size="0.02 0.04 0.1" rgba="0 .8 1 1" mass="0.03"></geom>
+          <geom name="wheel_motor_R" type="cylinder" size="0.03 0.0125" pos="0 0 -0.1" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.25" contype="0" conaffinity="0"></geom>
+          <joint name="knee_R" type="hinge" pos="0 0 0.1" axis="1 0 0" range="-140 140"></joint>
+
+          <body name="RightWheel" pos="0.03 0 -0.1">
+            <geom type="cylinder" size="0.07 0.01" rgba="1 0.7 0 1" euler="0 90 0" mass="0.05"></geom>
+            <joint name="wheel_R" type="hinge" axis="1 0 0"></joint>
+          </body>
+        </body>
+      </body>
+
+      <body name="LeftThigh" pos="-0.12 -0.025 -0.1">
+        <geom type="box" size="0.02 0.04 0.1" rgba="1 0 .5 1" mass="0.06"></geom>
+        <joint name="hip_L" type="hinge" pos="0 0 0.1" axis="1 0 0" range="-90 90"></joint>
+
+        <body name="LeftShin" pos="0 0 -0.2">
+          <geom type="box" size="0.02 0.04 0.1" rgba="0 .8 1 1" mass="0.03"></geom>
+          <geom name="wheel_motor_L" type="cylinder" size="0.03 0.0125" pos="0 0 -0.1" euler="0 90 0" rgba="0.5 0.5 0.5 1" mass="0.25" contype="0" conaffinity="0"></geom>
+          <joint name="knee_L" type="hinge" pos="0 0 0.1" axis="1 0 0" range="-140 140"></joint>
+
+          <body name="LeftWheel" pos="-0.03 0 -0.1">
+            <geom type="cylinder" size="0.07 0.01" rgba="1 0.7 0 1" euler="0 90 0" mass="0.05"></geom>
+            <joint name="wheel_L" type="hinge" axis="1 0 0"></joint>
+          </body>
+        </body>
+      </body>
+    </body>
+  </worldbody>
+
+  <sensor>
+    <accelerometer name="accel" site="imu"></accelerometer>
+    <gyro name="gyro" site="imu"></gyro>
+  </sensor>
+
+  <!--
+    Hips/knees: DAMIAO DM-J4310P-2EC (V1.2), rated 3.5 Nm, peak 12.5 Nm, no-load 200 rpm.
+      forcerange = rated torque (continuous); the peak is only available for short bursts.
+      kp/kv = the Kp/Kd you will send the motor in MIT mode (same values on the real robot).
+    Wheels: DAMIAO DM-H6215, max 2 Nm, nominal 1 Nm, no-load 320 rpm.
+      torque = ctrl * gear, so ctrl -1..1 maps to -2..2 Nm.
+  -->
+  <actuator>
+    <position name="hip_R" joint="hip_R" kp="20" kv="0.5" ctrlrange="-1.57 1.57" forcerange="-3.5 3.5" />
+    <position name="hip_L" joint="hip_L" kp="20" kv="0.5" ctrlrange="-1.57 1.57" forcerange="-3.5 3.5" />
+    <position name="knee_R" joint="knee_R" kp="20" kv="0.5" ctrlrange="-2.44 2.44" forcerange="-3.5 3.5" />
+    <position name="knee_L" joint="knee_L" kp="20" kv="0.5" ctrlrange="-2.44 2.44" forcerange="-3.5 3.5" />
+    <motor name="wheel_R" joint="wheel_R" ctrlrange="-1 1" gear="2" />
+    <motor name="wheel_L" joint="wheel_L" ctrlrange="-1 1" gear="2" />
+  </actuator>
+</mujoco>

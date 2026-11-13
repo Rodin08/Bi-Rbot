@@ -7,7 +7,7 @@ import math
 
 from numpy.typing import NDArray
 
-XML = Path(__file__).parent / "test.xml"
+XML = Path(__file__).parent / "Bi_rBot_Model.xml"
 
 TARGET_SPEED = 0.5
 TARGET_HEIGHT = -0.2
@@ -17,7 +17,7 @@ FRAME_SKIP = 5
 MAX_STEPS = 1000
 
 
-class BiRbotEnv(gym.Env):
+class Bi_rBot_Env(gym.Env):
     def __init__(self, render_mode=None) -> None:
         self.model = mujoco.MjModel.from_xml_path(str(XML))
         self.data = mujoco.MjData(self.model)
