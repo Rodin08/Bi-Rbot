@@ -16,5 +16,5 @@ if __name__ == "__main__":
     env = make_vec_env(Bi_rBot_Env, N_ENVS, vec_env_cls=SubprocVecEnv)
     model = PPO("MlpPolicy", env, verbose=1, tensorboard_log="runs/")
     checkpoint = CheckpointCallback(SAVE_EVERY // N_ENVS, "models/" + RUN_NAME, "ppo")
-    model.learn(TOTAL_STEPS, checkpoint, tb_log_name=RUN_NAME)
+    model.learn(TOTAL_STEPS, checkpoint, tb_log_name=RUN_NAME, progress_bar=True)
     model.save("models/" + RUN_NAME + "/final")
