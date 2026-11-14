@@ -1,10 +1,9 @@
+import math
 from pathlib import Path
 
 import gymnasium as gym
 import mujoco
 import numpy as np
-import math
-
 from numpy.typing import NDArray
 
 XML = Path(__file__).parent / "Bi_rBot_Model.xml"
